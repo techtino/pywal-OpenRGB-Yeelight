@@ -1,0 +1,43 @@
+#! /usr/bin/python
+import json 
+import random
+from openrgb import OpenRGBClient
+from openrgb.utils import RGBColor, DeviceType
+from yeelight import Bulb
+
+#Convert pywal hex values into RGB for OpenRGB
+def hex_to_rgb(value):
+    value = value.lstrip('#')
+    lv = len(value)
+    return tuple(int(value[i:i+lv//3], 16) for i in range(0, lv, lv//3))
+
+#Open pywal JSON File
+with open('/home/techtino/.cache/wal/colors.json') as colors_json:
+    pywalData = json.load(colors_json)
+
+#Set all RGB color variables 
+allColours = pywalData['colors']
+backgroundForeground = pywalData['special']
+
+bgColour = hex_to_rgb(backgroundForeground['background'])
+
+RGBColourSets = [hex_to_rgb(allColours['color0']), hex_to_rgb(allColours['color1']), hex_to_rgb(allColours['color2']), hex_to_rgb(allColours['color3']), hex_to_rgb(allColours['color4']), hex_to_rgb(allColours['color5']), hex_to_rgb(allColours['color6']), hex_to_rgb(allColours['color7']), hex_to_rgb(allColours['color8']), hex_to_rgb(allColours['color9']), hex_to_rgb(allColours['color10']), hex_to_rgb(allColours['color11']), hex_to_rgb(allColours['color12']), hex_to_rgb(allColours['color13']), hex_to_rgb(allColours['color14']), hex_to_rgb(allColours['color15'])]
+
+#Randomly pick the colours used 
+firstColour = random.choice(RGBColourSets)
+secondColour = random.choice(RGBColourSets)
+thirdColour = random.choice(RGBColourSets)
+
+bulb = Bulb("192.168.1.189")
+bulb.set_rgb(firstColour[0],firstColour[1],firstColour[2])
+client = OpenRGBClient()
+
+client.clear() # Turns everything off
+
+motherboard = client.get_devices_by_type(DeviceType.DEVICE_TYPE_MOTHERBOARD)[0]
+RAM_1 = client.get_devices_by_type(DeviceType.DEVICE_TYPE_DRAM)[0]
+RAM_2 = client.get_devices_by_type(DeviceType.DEVICE_TYPE_DRAM)[1]
+
+motherboard.set_color(RGBColor(firstColour[0],firstColour[1],firstColour[2]))
+RAM_1.set_color(RGBColor(secondColour[0],secondColour[1],secondColour[2]))
+RAM_2.set_color(RGBColor(thirdColour[0],thirdColour[1],thirdColour[2]))
